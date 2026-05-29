@@ -87,6 +87,51 @@ function mottoAnimations() {
   }, 5000);
 }
 
+function initContactForm() {
+  const form = document.getElementById('message-form');
+  if (!form) return;
+
+  const modalEl = document.getElementById('messageModal');
+  const modalBody = modalEl?.querySelector('.modal-body');
+  const modalLabel = document.getElementById('messageModalLabel');
+
+  modalEl.addEventListener('hidden.bs.modal', () => {
+    modalLabel.textContent = 'Üzenetküldés';
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const bsModal = new bootstrap.Modal(modalEl);
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        modalLabel.textContent = 'Üzenet elküldve!';
+        modalBody.textContent = 'Köszönöm szépen, hamarosan válaszolok.';
+        form.reset();
+      } else {
+        modalLabel.textContent = 'Hiba történt';
+        modalBody.textContent = 'Az üzenet küldése nem sikerült, próbáld újra később.';
+      }
+    } catch {
+      modalLabel.textContent = 'Hiba történt';
+      modalBody.textContent = 'Az üzenet küldése nem sikerült, próbáld újra később.';
+    }
+
+    bsModal.show();
+  });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   if (typeof AOS !== 'undefined') {
     AOS.init();
@@ -95,4 +140,5 @@ window.addEventListener('DOMContentLoaded', () => {
   initHidingButtons();
   initGliders();
   mottoAnimations();
+  initContactForm();
 });
